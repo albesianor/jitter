@@ -14,12 +14,13 @@ class HFEmbedder:
         self.tokenizer = AutoTokenizer.from_pretrained(hf_model)
         self.model = AutoModel.from_pretrained(hf_model)
 
-    def __call__(self, sentence: str) -> torch.Tensor:
+    def __call__(self, sentence: str, method: str = "mean") -> torch.Tensor:
         """
         Embeds a sentence using the selected model.
 
         Args:
             sentence (str): The sentence to embed.
+            method (str): The pooling method: mean (default), CLS.
 
         Returns:
             torch.Tensor: The mean of the word embeddings.
@@ -29,7 +30,14 @@ class HFEmbedder:
         with torch.inference_mode():
             outputs = self.model(**inputs)
 
+        if method == "CLS":
+            return outputs.last_hidden_state[:, 0, :]
+
         return outputs.last_hidden_state.mean(dim=1)
 
     def dimension(self) -> int:
+        """
+        Returns:
+            The embedding dimension.
+        """
         return self.model.config.hidden_size

@@ -1,0 +1,3 @@
+feedparser
+torch>=1.9+cpu
+transformers
