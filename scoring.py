@@ -23,4 +23,10 @@ class CosScorer:
         """
         return float(cosine_similarity(tensor, self.centroid, dim=1))
 
+    def centroid_size(self) -> torch.Size:
+        """
+        Returns:
+            torch.Size: The size of the centroid tensor.
+        """
+        return self.centroid.size()
     
