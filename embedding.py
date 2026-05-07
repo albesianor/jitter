@@ -30,3 +30,6 @@ class HFEmbedder:
             outputs = self.model(**inputs)
 
         return outputs.last_hidden_state.mean(dim=1)
+
+    def dimension(self) -> int:
+        return self.model.config.hidden_size
