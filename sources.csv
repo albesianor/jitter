@@ -1,0 +1,16 @@
+source,category,url
+NYT,World,https://rss.nytimes.com/services/xml/rss/nyt/World.xml
+NYT,World,https://rss.nytimes.com/services/xml/rss/nyt/Africa.xml
+NYT,World,https://rss.nytimes.com/services/xml/rss/nyt/Americas.xml
+NYT,World,https://rss.nytimes.com/services/xml/rss/nyt/AsiaPacific.xml
+NYT,World,https://rss.nytimes.com/services/xml/rss/nyt/Europe.xml
+NYT,World,https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml
+NYT,US,https://rss.nytimes.com/services/xml/rss/nyt/US.xml
+NYT,US,https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml
+NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/Business.xml
+NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/EnergyEnvironment.xml
+NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/SmallBusiness.xml
+NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/Dealbook.xml
+NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/MediaandAdvertising.xml
+NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/YourMoney.xml
+NYT,Technology,https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
