@@ -2,6 +2,11 @@ import feedparser
 import pandas as pd
 
 def from_urls(urls: list) -> list:
+    """
+    Takes a list of RSS feeds urls and returns a pandas dataframe
+    of parsed feed entries. Each entry consists of:
+      title, description, timestamp, source
+    """
     parsed_feed = []
 
     for url in urls:
