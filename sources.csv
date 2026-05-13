@@ -14,3 +14,20 @@ NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/Dealbook.xml
 NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/MediaandAdvertising.xml
 NYT,Business,https://rss.nytimes.com/services/xml/rss/nyt/YourMoney.xml
 NYT,Technology,https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
+WSJ,World,https://feeds.content.dowjones.io/public/rss/RSSWorldNews
+WSJ,Business,https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness
+WSJ,Markets,https://feeds.content.dowjones.io/public/rss/RSSMarketsMain
+WSJ,Technology,https://feeds.content.dowjones.io/public/rss/RSSWSJD
+WSJ,US,https://feeds.content.dowjones.io/public/rss/RSSUSnews
+WSJ,Politics,https://feeds.content.dowjones.io/public/rss/socialpoliticsfeed
+WSJ,Economy,https://feeds.content.dowjones.io/public/rss/socialeconomyfeed
+WSJ,Personal Finance,https://feeds.content.dowjones.io/public/rss/RSSPersonalFinance
+WSJ,Health,https://feeds.content.dowjones.io/public/rss/socialhealth
+Bloomberg,Markets,https://feeds.bloomberg.com/markets/news.rss
+Bloomberg,Politics,https://feeds.bloomberg.com/politics/news.rss
+Bloomberg,Technology,https://feeds.bloomberg.com/technology/news.rss
+Bloomberg,Personal Finance,https://feeds.bloomberg.com/wealth/news.rss
+Bloomberg,Economy,https://feeds.bloomberg.com/economics/news.rss
+Bloomberg,Business,https://feeds.bloomberg.com/industries/news.rss
+Bloomberg,Business,https://feeds.bloomberg.com/business/news.rss
+Bloomberg,Technology,https://feeds.bloomberg.com/green/news.rss
