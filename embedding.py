@@ -38,6 +38,6 @@ class HFEmbedder:
     def dimension(self) -> int:
         """
         Returns:
-            The embedding dimension.
+            int: The embedding dimension.
         """
         return self.model.config.hidden_size
