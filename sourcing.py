@@ -21,9 +21,23 @@ def from_urls(urls: list) -> list:
                 "title": entry.title,
                 "description": entry.description,
                 "timestamp": entry.published_parsed,
-                "source": feed.feed.title
+                # "source": feed.feed.title
             }
 
             parsed_feed.append(parsed_entry)
 
-    return pd.DataFrame(parsed_feed)
+    return pd.DataFrame(parsed_feed).drop_duplicates(subset="title", inplace=False)
+
+def update_dataset(path: str, dataframe: pd.DataFrame) -> None:
+    """
+    Utility function to update an existing CSV dataframe by concatenating a new dataframe.
+
+    Args:
+        path (str): Path on disk of the existing dataframe.
+        dataframe (pandas.DataFrame): The dataframe to concatenate.
+    """
+    old_df = pd.read_csv(path)
+    new_df = pd.concat([old_df, dataframe], ignore_index=True)
+
+    new_df.drop_duplicates(subset="title", inplace=True)
+    new_df.to_csv(path, index=False)
