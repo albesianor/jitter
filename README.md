@@ -2,4 +2,4 @@
 
 A tool to measure "jitter" from newspapers headlines.
 
-See [main.ipynb](main.ipynb) for a demo.
+See [00_naive.ipynb](00_naive.ipynb) for a demo of a naive implementation.
