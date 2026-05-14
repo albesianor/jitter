@@ -44,27 +44,29 @@ class HFGoodBadLabeler:
                  -1 otherwise
         """
 
+        good = self.good
+        high = self.high
+        low = self.low
+        hard_cutoff = self.hard_cutoff
+
         classification = self.classifier(sequence, self.classes)
 
+        labels = classification["labels"]
+        scores = classification["scores"]
+
         # test if highest category is in good or bad
-        if classification["scores"][0] > self.hard_cutoff:
-            label = classification["labels"][0]
-            
-            if label in self.good:
-                return 1
-            else:
-                return 0
+        if scores[0] > hard_cutoff:
+            return int(labels[0] in good)
 
         # compute good score
-        good_score = 0
-        for i, label in enumerate(classification["labels"]):
-            if label in self.good:
-                good_score += classification["scores"][i]
+        good_score = 0.0
+        for label, score in zip(labels, scores):
+            if label in good:
+                good_score += score
+                if good_score > high:
+                    return 1
 
-        if good_score > self.high:
-            return 1
-        
-        if good_score < self.low:
+        if good_score < low:
             return 0
 
         return -1
