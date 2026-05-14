@@ -26,7 +26,7 @@ def from_urls(urls: list) -> list:
 
             parsed_feed.append(parsed_entry)
 
-    return pd.DataFrame(parsed_feed).drop_duplicates(subset="title", inplace=False)
+    return pd.DataFrame(parsed_feed).drop_duplicates(subset="title", inplace=False).dropna(inplace=False)
 
 def update_dataset(path: str, dataframe: pd.DataFrame) -> None:
     """
@@ -40,4 +40,5 @@ def update_dataset(path: str, dataframe: pd.DataFrame) -> None:
     new_df = pd.concat([old_df, dataframe], ignore_index=True)
 
     new_df.drop_duplicates(subset="title", inplace=True)
+    new_df.dropna(inplace=True)
     new_df.to_csv(path, index=False)
