@@ -1,4 +1,5 @@
 import feedparser
+import ssl
 import pandas as pd
 
 def from_urls(urls: list) -> list:
@@ -11,6 +12,10 @@ def from_urls(urls: list) -> list:
     Returns:
         pandas.DataFrame: A table of title, description, timestamp, source.
     """
+    # certificates error patch
+    if hasattr(ssl, '_create_unverified_context'):
+        ssl._create_default_https_context = ssl._create_unverified_context
+
     parsed_feed = []
 
     for url in urls:
