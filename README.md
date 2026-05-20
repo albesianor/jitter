@@ -39,7 +39,7 @@ Training for `NN1` and `NN2` is done by knowledge distillation from a zero-shot 
 | preliminary exploration and naive model | [00_naive.ipynb](00_naive.ipynb)                     |
 | data collection                         | [01_data_collection.ipynb](01_data_collection.ipynb) |
 | relevance labeling (for `NN1` training) | [02_labeling.ipynb](02_labeling.ipynb)               |
-| `NN1` implementation and training       | |
+| `NN1` implementation and training       | [03_filter_training.ipynb](03_filter_training.ipynb) |
 | scoring (for `NN2` training)            | |
 | `NN2` implementation and training       | |
 | complete inference pipeline             | |
