@@ -1,7 +1,10 @@
 feedparser
 transformers
+sentence-transformers
 datasets
+keras~=3.0
 torch
+scikit-learn
 numpy
 pandas
 tqdm
