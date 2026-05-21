@@ -34,12 +34,12 @@ cleaned headlines --(BERT)--> embedded vectors --(NN1)--> relevant vectors --(NN
 Training for `NN1` and `NN2` is done by knowledge distillation from a zero-shot BERT classifier (on a separate dataset initially, then taking into account user feedback).
 
 ### Notebooks
-| Function | Notebook |
-|---|---|
-| preliminary exploration and naive model | [00_naive.ipynb](00_naive.ipynb)                     |
-| data collection                         | [01_data_collection.ipynb](01_data_collection.ipynb) |
-| relevance labeling (for `NN1` training) | [02_labeling.ipynb](02_labeling.ipynb)               |
-| `NN1` implementation and training       | [03_filter_training.ipynb](03_filter_training.ipynb) |
-| scoring (for `NN2` training)            | |
+| Function                                | Notebook                                               |
+| --------------------------------------- | ------------------------------------------------------ |
+| preliminary exploration and naive model | [`00_naive.ipynb`](00_naive.ipynb)                     |
+| data collection                         | [`01_data_collection.ipynb`](01_data_collection.ipynb) |
+| relevance labeling (for `NN1` training) | [`02_labeling.ipynb`](02_labeling.ipynb)               |
+| `NN1` implementation and training       | [`03_filter_training.ipynb`](03_filter_training.ipynb) |
+| scoring (for `NN2` training)            | [`04_scoring.ipynb`](04_scoring.ipynb)                 |
 | `NN2` implementation and training       | |
 | complete inference pipeline             | |
