@@ -41,5 +41,5 @@ Training for `NN1` and `NN2` is done by knowledge distillation from a zero-shot 
 | relevance labeling (for `NN1` training) | [`02_labeling.ipynb`](02_labeling.ipynb)               |
 | `NN1` implementation and training       | [`03_filter_training.ipynb`](03_filter_training.ipynb) |
 | scoring (for `NN2` training)            | [`04_scoring.ipynb`](04_scoring.ipynb)                 |
-| `NN2` implementation and training       | |
+| `NN2` implementation and training       | [`05_scorer_training.ipynb`](05_scorer_training.ipynb) |
 | complete inference pipeline             | |
