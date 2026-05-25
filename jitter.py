@@ -18,7 +18,9 @@ class JitterEvaluator:
         self._embedder = SentenceTransformer(embedding_model)
         self._filter = LogisticRegressionCV(cv=5)
         self._scorer = LogisticRegressionCV(cv=5)
-        self._current = pd.DataFrame(columns=["concat", "embedding", "relevant", "jittery"])
+        self._current = pd.DataFrame(
+            columns=["concat", "embedding", "relevant", "jittery"]
+        )
         self._total_jitter = None
 
     def train(self, df: pd.DataFrame):
@@ -42,12 +44,25 @@ class JitterEvaluator:
         Args:
             headlines (pd.Series): List of headlines as string.
         """
-        self._current = pd.DataFrame(columns=["concat", "embedding", "relevant", "jittery"])
+        self._current = pd.DataFrame(
+            columns=["concat", "embedding", "relevant", "jittery"]
+        )
         self._current["concat"] = headlines
-        self._current["embedding"] = self._embedder.encode(self._current.concat.to_list()).tolist()
+        self._current["embedding"] = self._embedder.encode(
+            self._current.concat.to_list()
+        ).tolist()
 
-        self._current["relevant"] = self._filter.predict(pd.DataFrame(self._current.embedding.to_list()))
-        self._current["jittery"] = self._current.apply(lambda x: self._scorer.predict(np.array(x.embedding).reshape(1, -1)) if x.relevant == 1 else None, axis=1)
+        self._current["relevant"] = self._filter.predict(
+            pd.DataFrame(self._current.embedding.to_list())
+        )
+        self._current["jittery"] = self._current.apply(
+            lambda x: (
+                self._scorer.predict(np.array(x.embedding).reshape(1, -1))
+                if x.relevant == 1
+                else None
+            ),
+            axis=1,
+        )
 
         self._total_jitter = self._current.jittery.dropna(inplace=False).mean()
 
@@ -58,7 +73,7 @@ class JitterEvaluator:
             The complete current prediction dataset.
         """
         return self._current
-    
+
     @property
     def total_jitter(self) -> float:
         """
@@ -76,7 +91,7 @@ class JitterEvaluator:
 
 
 def get_headlines(urls: list[str], date: str = None) -> pd.Series:
-    if hasattr(ssl, '_create_unverified_context'):
+    if hasattr(ssl, "_create_unverified_context"):
         ssl._create_default_https_context = ssl._create_unverified_context
 
     parsed_feed = []
@@ -97,13 +112,16 @@ def get_headlines(urls: list[str], date: str = None) -> pd.Series:
             except:
                 print("Skipping", entry)
 
+    df = (
+        pd.DataFrame(parsed_feed)
+        .drop_duplicates(subset="concat", inplace=False)
+        .dropna(inplace=False)
+    )
 
-    df = pd.DataFrame(parsed_feed).drop_duplicates(subset="concat", inplace=False).dropna(inplace=False)
-    
     if date:
         if date == "today":
             date = time.strftime("%Y-%m-%d")
-        
+
         df = df[df.date == date]
 
     df.reset_index(inplace=True)
