@@ -28,8 +28,10 @@ class JitterEvaluator:
         Train the filter and scorer models.
 
         Args:
-            df (pd.DataFrame): Pandas dataframe with (at least) columns `embeddings`, `relevant`, `jittery`
+            df (pd.DataFrame): Pandas dataframe with (at least) columns `embedding`, `relevant`, `jittery`
         """
+        assert len(df.embedding[0]) == self._embedder.get_sentence_embedding_dimension()
+
         self._filter.fit(pd.DataFrame(df.embedding.to_list()), df.relevant)
 
         df = df[df.relevant == 1]

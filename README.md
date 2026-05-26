@@ -1,46 +1,54 @@
 # Jitter
 
-#### Goal
-Develop a natural language processing tool that measures "world instability" from news headlines.
+A natural language processing tool to measure instability from news headlines.
 
-#### User interface
-- User provides RSS feeds.
-- Tool computes each headline "instability" score between 0 and 1.
-- Interface returns a score distribution and summary metrics.
-- User can give feedback on each headline.
-- Model retrains with user feedback.
-
-## Implementation
-### Data collection
-- Load feed urls from disk.
-- Download and parse feeds (`feedparser`).
-- Clean feed and concatenate title and description.
-
-### Naive scoring
-- Use a BERT model to embed sequences.
-- Compute the centroid of the embeddings of some preset "instability" headlines.
-- Score the embeddings against the centroid by cosine-similarity.
-
-This is easy to implement ([00_naive.ipynb](00_naive.ipynb)) and fast, but has two main issues:
-- relevant and irrelevant headlines are treated similarly (irrelevant headlines contribute to the overall score),
-- having a single centroid doesn't allow to capture nuances.
-
-### Improved model
-Three-stages model:
-```
-cleaned headlines --(BERT)--> embedded vectors --(NN1)--> relevant vectors --(NN2)--> score
+## Design
+The current data pipeline is as follows
+```mermaid
+flowchart TD
+   A[RSS feed] -- parsing --> B[headlines] -- BERT --> C[embeddings] -- logistic regression filter --> D[relevant headlines embeddings] -- logistic regression classifier --> E[jittery/non-jittery relevant headlines]
 ```
 
-Training for `NN1` and `NN2` is done by knowledge distillation from a zero-shot BERT classifier (on a separate dataset initially, then taking into account user feedback).
+To learn more about the research part of the project, refer to [`research/README.md`](research/README.md) and read the notebooks in the [`research/`](research/) folder.
 
-### Notebooks
-| Function                                | Notebook                                                 |
-| --------------------------------------- | -------------------------------------------------------- |
-| preliminary exploration and naive model | [`00_naive.ipynb`](00_naive.ipynb)                       |
-| data collection                         | [`01_data_collection.ipynb`](01_data_collection.ipynb)   |
-| relevance labeling (for `NN1` training) | [`02_labeling.ipynb`](02_labeling.ipynb)                 |
-| `NN1` implementation and training       | [`03_filter_training.ipynb`](03_filter_training.ipynb)   |
-| scoring (for `NN2` training)            | [`04_scoring.ipynb`](04_scoring.ipynb)                   |
-| `NN2` implementation and training       | [`05_scorer_training.ipynb`](05_scorer_training.ipynb)   |
-| initial dataset compilation             | [`06_initial_dataset.ipynb`](06_initial_dataset.ipynb)   |
-| complete pipeline example               | [`07_pipeline_example.ipynb`](07_pipeline_example.ipynb) |
+## Usage
+Instantiate a `JitterEvaluator` class: this is the main engine
+```python3
+engine = JitterEvaluator()
+```
+The constructor takes an optional argument to specify the HuggingFace BERT model to use for embeddings. Defaults to
+```python3
+engine = JitterEvaluator(embedding_model="ProsusAI/finbert")
+```
+
+The engine needs to be trained.  To train it, call the `train()` method with a Pandas dataframe with columns `embedding` (as vectors), `relevant` (0/1), `jittery` (0/1):
+```python3
+engine.train(df)
+```
+
+Note that the embeddings should be produced by the same model specified in the `JitterEvaluator` constructor.  For your convenience, [`training.csv`](training.csv) contains a training dataset (see [`example.ipynb`](example.ipynb) for more details).
+
+To process headlines, pass them as a Pandas series to the `process_headlines()` method:
+```python3
+engine.process_headlines(headlines)
+```
+
+The `total_jitter` property gives an overall score of jitteriness.  It is the fraction of jittery headlines over the total number of headlines.
+
+For your convenience, the `jitter` module contains a `get_headlines()` function to automatically retrieve headlines from a list of RSS urls:
+```python3
+get_headlines(urls, date="YYYY-MM-DD")
+```
+
+The optional parameter `date` can be set to `"today"` to fetch today's headlines only.  If the parameter is not set, all available headlines are fetched.  A list of RSS feed urls is contained in [`sources.csv`](sources.csv).
+
+For a complete interactive usage example, see [`example.ipynb`](example.ipynb).
+
+
+## TODOs
+This repo is a work in progress. Here are a few items to work on or consider:
+- a web API (using FastAPI)
+- a web interface to the API
+- user feedback
+- compute jitter score (continuous in [0,1]) instead of classes (0 or 1)
+- if jitter is a score, do more sophisticated statistical analysis
