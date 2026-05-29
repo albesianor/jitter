@@ -1,6 +1,10 @@
+import os
+os.environ["KERAS_BACKEND"] = "torch"
+
 import feedparser
 import time
 import ssl
+import keras
 import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -15,29 +19,48 @@ class JitterEvaluator:
         Args:
             embedding_model (str): HuggingFace model identifier
         """
+        # embedder
         self._embedder = SentenceTransformer(embedding_model)
-        self._filter = LogisticRegressionCV(cv=5)
-        self._scorer = LogisticRegressionCV(cv=5)
-        self._current = pd.DataFrame(
-            columns=["concat", "embedding", "relevant", "jittery"]
+
+        # models
+        self._filter = LogisticRegressionCV(cv=5, class_weight="balanced")
+        self._scorer = keras.Sequential(
+            layers=[
+                keras.layers.Dense(128, activation="relu"),
+                keras.layers.Dropout(0.5),
+                keras.layers.Dense(128, activation="relu"),
+                keras.layers.Dropout(0.5),
+                keras.layers.Dense(1, activation="sigmoid"),
+            ]
         )
-        self._total_jitter = None
+        self._scorer.compile(optimizer="adam", loss="binary_crossentropy", metrics=["mae"])
+
+        # data
+        self._current = pd.DataFrame(
+            columns=["concat", "embedding", "relevant", "jitter"]
+        )
 
     def train(self, df: pd.DataFrame):
         """
         Train the filter and scorer models.
 
         Args:
-            df (pd.DataFrame): Pandas dataframe with (at least) columns `embedding`, `relevant`, `jittery`
+            df (pd.DataFrame): Pandas dataframe with (at least) columns `embedding`, `relevant`, `jitter`
         """
         assert len(df.embedding[0]) == self._embedder.get_sentence_embedding_dimension()
 
+        # filter
         self._filter.fit(pd.DataFrame(df.embedding.to_list()), df.relevant)
 
+        # scorer
         df = df[df.relevant == 1]
         df.dropna(inplace=True)
         df.reset_index(inplace=True)
-        self._scorer.fit(pd.DataFrame(df.embedding.to_list()), df.jittery)
+
+        X = np.stack(df.embedding.values)
+        y = df.jitter.values[:, np.newaxis]
+
+        self._scorer.fit(X, y, batch_size=128, epochs=7, validation_split=0.2, verbose=0)
 
     def process_headlines(self, headlines: pd.Series):
         """
@@ -47,7 +70,7 @@ class JitterEvaluator:
             headlines (pd.Series): List of headlines as string.
         """
         self._current = pd.DataFrame(
-            columns=["concat", "embedding", "relevant", "jittery"]
+            columns=["concat", "embedding", "relevant", "jitter"]
         )
         self._current["concat"] = headlines
         self._current["embedding"] = self._embedder.encode(
@@ -57,16 +80,14 @@ class JitterEvaluator:
         self._current["relevant"] = self._filter.predict(
             pd.DataFrame(self._current.embedding.to_list())
         )
-        self._current["jittery"] = self._current.apply(
+        self._current["jitter"] = self._current.apply(
             lambda x: (
-                self._scorer.predict(np.array(x.embedding).reshape(1, -1))
+                self._scorer.predict(np.array(x.embedding).reshape(1, -1), verbose=0)[0, 0]
                 if x.relevant == 1
                 else None
             ),
             axis=1,
         )
-
-        self._total_jitter = self._current.jittery.dropna(inplace=False).mean()
 
     @property
     def current_prediction(self) -> pd.DataFrame:
@@ -75,14 +96,6 @@ class JitterEvaluator:
             The complete current prediction dataset.
         """
         return self._current
-
-    @property
-    def total_jitter(self) -> float:
-        """
-        Returns:
-            The current total jitter (fraction of jittery headlines over total).
-        """
-        return self._total_jitter
 
     def random_headline(self) -> pd.DataFrame:
         """
