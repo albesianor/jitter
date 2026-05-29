@@ -43,12 +43,3 @@ get_headlines(urls, date="YYYY-MM-DD")
 The optional parameter `date` can be set to `"today"` to fetch today's headlines only.  If the parameter is not set, all available headlines are fetched.  A list of RSS feed urls is contained in [`sources.csv`](sources.csv).
 
 For a complete interactive usage example, see [`example.ipynb`](example.ipynb).
-
-
-## TODOs
-This repo is a work in progress. Here are a few items to work on or consider:
-- a web API (using FastAPI)
-- a web interface to the API
-- user feedback
-- compute jitter score (continuous in [0,1]) instead of classes (0 or 1)
-- if jitter is a score, do more sophisticated statistical analysis
