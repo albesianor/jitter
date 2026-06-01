@@ -39,6 +39,8 @@ class JitterEvaluator:
         self._current = pd.DataFrame(
             columns=["concat", "embedding", "relevant", "jitter"]
         )
+        self._mean = None
+        self._std = None
 
     def train(self, df: pd.DataFrame):
         """
@@ -47,7 +49,7 @@ class JitterEvaluator:
         Args:
             df (pd.DataFrame): Pandas dataframe with (at least) columns `embedding`, `relevant`, `jitter`
         """
-        assert len(df.embedding[0]) == self._embedder.get_sentence_embedding_dimension()
+        assert len(df.embedding[0]) == self._embedder.get_embedding_dimension()
 
         # filter
         self._filter.fit(pd.DataFrame(df.embedding.to_list()), df.relevant)
@@ -89,6 +91,9 @@ class JitterEvaluator:
             axis=1,
         )
 
+        self._mean = self._current.jitter.mean()
+        self._std = self._current.jitter.std()
+
     @property
     def current_prediction(self) -> pd.DataFrame:
         """
@@ -96,6 +101,18 @@ class JitterEvaluator:
             The complete current prediction dataset.
         """
         return self._current
+
+    @property
+    def mean(self) -> float:
+        return self._mean
+
+    @property
+    def std(self) -> float:
+        return self._std
+
+    @property
+    def distribution(self) -> pd.Series:
+        return self._current.jitter.dropna(inplace=False)
 
     def random_headline(self) -> pd.DataFrame:
         """
@@ -105,7 +122,7 @@ class JitterEvaluator:
         return self._current.sample()
 
 
-def get_headlines(urls: list[str], date: str = None) -> pd.Series:
+def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
     if hasattr(ssl, "_create_unverified_context"):
         ssl._create_default_https_context = ssl._create_unverified_context
 
