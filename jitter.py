@@ -36,11 +36,7 @@ class JitterEvaluator:
         )
 
         # data
-        self._current = pd.DataFrame(
-            columns=["concat", "embedding", "relevant", "jitter"]
-        )
-        self._mean = None
-        self._std = None
+        self.clear()
 
     def train(self, df: pd.DataFrame):
         """
@@ -73,18 +69,25 @@ class JitterEvaluator:
         Args:
             headlines (pd.Series): List of headlines as string.
         """
-        self._current = pd.DataFrame(
+
+        # only process new headlines
+        headlines = headlines[~headlines.isin(self._current.concat)]
+
+        if len(headlines) == 0:
+            return
+
+        new_current = pd.DataFrame(
             columns=["concat", "embedding", "relevant", "jitter"]
         )
-        self._current["concat"] = headlines
-        self._current["embedding"] = self._embedder.encode(
-            self._current.concat.to_list()
+        new_current["concat"] = headlines
+        new_current["embedding"] = self._embedder.encode(
+            new_current.concat.to_list()
         ).tolist()
 
-        self._current["relevant"] = self._filter.predict(
-            pd.DataFrame(self._current.embedding.to_list())
+        new_current["relevant"] = self._filter.predict(
+            pd.DataFrame(new_current.embedding.to_list())
         )
-        self._current["jitter"] = self._current.apply(
+        new_current["jitter"] = new_current.apply(
             lambda x: (
                 self._scorer.predict(np.array(x.embedding).reshape(1, -1), verbose=0)[
                     0, 0
@@ -95,8 +98,21 @@ class JitterEvaluator:
             axis=1,
         )
 
+        # append to old current
+        self._current = pd.concat([self._current, new_current], ignore_index=True)
+
         self._mean = self._current.jitter.mean()
         self._std = self._current.jitter.std()
+
+    def clear(self):
+        """
+        Clear current headlines and predictions
+        """
+        self._current = pd.DataFrame(
+            columns=["concat", "embedding", "relevant", "jitter"]
+        )
+        self._mean = None
+        self._std = None
 
     @property
     def current_prediction(self) -> pd.DataFrame:
