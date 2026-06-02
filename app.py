@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from typing import Any
 from contextlib import asynccontextmanager
 import pandas as pd
-import ast, datetime
+import datetime
 
 import models
+from routines import train, predict
 from jitter import JitterEvaluator, get_headlines
 
 
@@ -17,17 +18,11 @@ async def lifespan(app: FastAPI):
     engine = JitterEvaluator()
 
     print("Training.")
-    training = pd.read_csv("training.csv")
-    training["embedding"] = training.embedding.apply(ast.literal_eval)
-
-    engine.train(training)
+    await train(engine)
     train_time = datetime.datetime.now()
 
     print("Begin predictions.")
-    urls = pd.read_csv("sources.csv").url
-    headlines = get_headlines(urls, date="today")
-    engine.process_headlines(headlines)
-
+    await predict(engine)
     update_time = datetime.datetime.now()
 
     status = models.Status(last_trained=train_time, last_updated=update_time)
@@ -59,7 +54,7 @@ async def distribution() -> Any:
     }
 
 
-@app.get("/random/")
+@app.get("/random/", response_model=models.Headline)
 async def random() -> Any:
     headline = engine.random_headline()
     return {
