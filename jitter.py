@@ -1,9 +1,7 @@
 import os
+
 os.environ["KERAS_BACKEND"] = "jax"
 
-import feedparser
-import time
-import ssl
 import keras
 import pandas as pd
 import numpy as np
@@ -33,7 +31,9 @@ class JitterEvaluator:
                 keras.layers.Dense(1, activation="sigmoid"),
             ]
         )
-        self._scorer.compile(optimizer="adam", loss="binary_crossentropy", metrics=["mae"])
+        self._scorer.compile(
+            optimizer="adam", loss="binary_crossentropy", metrics=["mae"]
+        )
 
         # data
         self._current = pd.DataFrame(
@@ -62,7 +62,9 @@ class JitterEvaluator:
         X = np.stack(df.embedding.values)
         y = df.jitter.values[:, np.newaxis]
 
-        self._scorer.fit(X, y, batch_size=128, epochs=7, validation_split=0.2, verbose=0)
+        self._scorer.fit(
+            X, y, batch_size=128, epochs=7, validation_split=0.2, verbose=0
+        )
 
     def process_headlines(self, headlines: pd.Series):
         """
@@ -84,7 +86,9 @@ class JitterEvaluator:
         )
         self._current["jitter"] = self._current.apply(
             lambda x: (
-                self._scorer.predict(np.array(x.embedding).reshape(1, -1), verbose=0)[0, 0]
+                self._scorer.predict(np.array(x.embedding).reshape(1, -1), verbose=0)[
+                    0, 0
+                ]
                 if x.relevant == 1
                 else None
             ),
@@ -120,42 +124,3 @@ class JitterEvaluator:
             A random headline.
         """
         return self._current.sample()
-
-
-def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
-    if hasattr(ssl, "_create_unverified_context"):
-        ssl._create_default_https_context = ssl._create_unverified_context
-
-    parsed_feed = []
-
-    for url in urls:
-        try:
-            feed = feedparser.parse(url)
-        except:
-            print("Unable to parse feed", url)
-
-        for entry in feed.entries:
-            try:
-                parsed_entry = {
-                    "concat": entry.title + " | " + entry.description,
-                    "date": time.strftime("%Y-%m-%d", entry.published_parsed),
-                }
-                parsed_feed.append(parsed_entry)
-            except:
-                print("Skipping", entry)
-
-    df = (
-        pd.DataFrame(parsed_feed)
-        .drop_duplicates(subset="concat", inplace=False)
-        .dropna(inplace=False)
-    )
-
-    if date:
-        if date == "today":
-            date = time.strftime("%Y-%m-%d")
-
-        df = df[df.date == date]
-
-    df.reset_index(inplace=True)
-
-    return df.concat
