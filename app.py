@@ -1,14 +1,11 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from typing import Any
 from contextlib import asynccontextmanager
-from jitter import JitterEvaluator, get_headlines
 import pandas as pd
 import ast, datetime
 
-
-class Status(BaseModel):
-    last_trained: datetime.datetime
-    last_updated: datetime.datetime
+import models
+from jitter import JitterEvaluator, get_headlines
 
 
 @asynccontextmanager
@@ -33,7 +30,7 @@ async def lifespan(app: FastAPI):
 
     update_time = datetime.datetime.now()
 
-    status = Status(last_trained=train_time, last_updated=update_time)
+    status = models.Status(last_trained=train_time, last_updated=update_time)
 
     print("Engine ready.")
 
@@ -45,21 +42,30 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-class Summary(BaseModel):
-    status: Status
-    mean: float
-    std: float
+@app.get("/summary/", response_model=models.Summary)
+async def summary() -> Any:
+    return {
+        "status": status,
+        "mean": engine.mean,
+        "std": engine.std
+    }
 
 
-@app.get("/summary/")
-async def summary() -> Summary:
-    return Summary(status=status, mean=engine.mean, std=engine.std)
+@app.get("/distribution/", response_model=models.Distribution)
+async def distribution() -> Any:
+    return {
+        "status": status,
+        "distribution": list(engine.distribution)
+    }
 
 
-class Distribution(BaseModel):
-    status: Status
-    distribution: list[float]
-
-@app.get("/distribution/")
-async def distribution() -> Distribution:
-    return Distribution(status=status, distribution=list(engine.distribution))
+@app.get("/random/")
+async def random() -> Any:
+    headline = engine.random_headline()
+    return {
+        "status": status,
+        "id": headline.index.to_list()[0],
+        "headline": headline.concat.to_list()[0],
+        "relevant": bool(headline.relevant.to_list()[0]),
+        "jitter": headline.jitter.to_list()[0]
+    }
