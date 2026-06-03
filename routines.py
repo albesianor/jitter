@@ -4,7 +4,7 @@ import ssl
 import pandas as pd
 
 
-async def get_headlines(urls: list[str]) -> pd.Series:
+async def get_headlines(urls: list[str], trim: int) -> pd.Series:
     if hasattr(ssl, "_create_unverified_context"):
         ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -34,7 +34,12 @@ async def get_headlines(urls: list[str]) -> pd.Series:
 
     # sort by timestamp
     df.sort_values(by="timestamp", inplace=True)
-
     df.reset_index(inplace=True)
+
+    # only keep the "trim"-most-recent
+    to_remove = len(df) - trim
+    if to_remove > 0:
+        df = df.iloc[to_remove :]
+        df.reset_index(inplace=True)
 
     return df.concat

@@ -11,16 +11,16 @@ from routines import get_headlines
 class Session:
     """The current predictions"""
 
-    def __init__(self, cut: int = 300, sources: str | None = None):
+    def __init__(self, trim: int = 300, sources: str | None = None):
         """
         Args:
-            cut (int): max number of headlines to keep in the session object
+            trim (int): max number of headlines to keep in the session object
             sources (str): filename of sources list
         """
         self._engine = JitterEvaluator()
         self._sources = pd.read_csv("sources.csv").url
         self._status = Status(last_trained=None, last_updated=None)
-        self._cut = cut
+        self._trim = trim
 
         self.clear()
 
@@ -64,7 +64,7 @@ class Session:
         if self._status.last_trained is None:
             return
 
-        headlines = await get_headlines(self._sources)
+        headlines = await get_headlines(self._sources, self._trim)
 
         await asyncio.to_thread(self.process_headlines, headlines)
 
@@ -110,8 +110,8 @@ class Session:
         # ignore_index=True resets the dataframe index
         self._current = pd.concat([self._current, new_current], ignore_index=True)
 
-        # trim self._current to self._cut items
-        to_remove = len(self._current) - self._cut
+        # trim self._current to self._trim items
+        to_remove = len(self._current) - self._trim
         if to_remove > 0:
             self._current = self._current.iloc[to_remove :]
             self._current.reset_index(inplace=True)

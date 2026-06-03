@@ -6,3 +6,4 @@ sentence-transformers
 keras
 jax
 fastapi[standard]
+APScheduler

@@ -1,15 +1,17 @@
+import os
 from fastapi import FastAPI
 from typing import Any
 from contextlib import asynccontextmanager
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import models
 from session import Session
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global session
 
+    # load, train, and initialize predictions
     print("Loading model.")
     session = Session()
 
@@ -21,8 +23,16 @@ async def lifespan(app: FastAPI):
 
     print("Engine ready.")
 
+    # schedule fetch_and_process
+    scheduler = AsyncIOScheduler()
+    frequency = int(os.getenv("REFRESH_FREQUENCY", 60))
+    print(f"Headlines updating every {frequency} minutes.")
+    scheduler.add_job(session.fetch_and_process, "interval", minutes=frequency)
+    scheduler.start()
+
     yield
 
+    scheduler.shutdown()
     del session
 
 
