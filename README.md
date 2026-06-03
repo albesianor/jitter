@@ -35,7 +35,7 @@ engine.process_headlines(headlines)
 
 The `current_prediction` property of engine gives the scores for all headlines.
 
-For your convenience, the `jitter` module contains also a `get_headlines()` function to automatically retrieve headlines from a list of RSS urls:
+For your convenience, the `routines` module contains also a `get_headlines()` function to automatically retrieve headlines from a list of RSS urls:
 ```python3
 get_headlines(urls, date="YYYY-MM-DD")
 ```
