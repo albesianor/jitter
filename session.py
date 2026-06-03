@@ -11,14 +11,16 @@ from routines import get_headlines
 class Session:
     """The current predictions"""
 
-    def __init__(self, sources: str | None = None):
+    def __init__(self, cut: int = 300, sources: str | None = None):
         """
         Args:
+            cut (int): max number of headlines to keep in the session object
             sources (str): filename of sources list
         """
         self._engine = JitterEvaluator()
         self._sources = pd.read_csv("sources.csv").url
         self._status = Status(last_trained=None, last_updated=None)
+        self._cut = cut
 
         self.clear()
 
@@ -62,13 +64,13 @@ class Session:
         if self._status.last_trained is None:
             return
 
-        headlines = await get_headlines(self._sources, date="today")
+        headlines = await get_headlines(self._sources)
 
         await asyncio.to_thread(self.process_headlines, headlines)
 
     def process_headlines(self, headlines: pd.Series) -> None:
         """
-        Process the headlines and store the result in the `JitterEvaluator` object.
+        Process the headlines and store the result.
 
         Args:
             headlines (pd.Series): List of headlines as string.
@@ -105,7 +107,14 @@ class Session:
         )
 
         # append to old current
+        # ignore_index=True resets the dataframe index
         self._current = pd.concat([self._current, new_current], ignore_index=True)
+
+        # trim self._current to self._cut items
+        to_remove = len(self._current) - self._cut
+        if to_remove > 0:
+            self._current = self._current.iloc[to_remove :]
+            self._current.reset_index(inplace=True)
 
         self._mean = self._current.jitter.mean()
         self._std = self._current.jitter.std()

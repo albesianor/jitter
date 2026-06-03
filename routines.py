@@ -4,7 +4,7 @@ import ssl
 import pandas as pd
 
 
-async def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
+async def get_headlines(urls: list[str]) -> pd.Series:
     if hasattr(ssl, "_create_unverified_context"):
         ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -20,7 +20,7 @@ async def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
             try:
                 parsed_entry = {
                     "concat": entry.title + " | " + entry.description,
-                    "date": time.strftime("%Y-%m-%d", entry.published_parsed),
+                    "timestamp": time.strftime("%Y-%m-%d-%H-%M-%S", entry.published_parsed),
                 }
                 parsed_feed.append(parsed_entry)
             except:
@@ -32,11 +32,8 @@ async def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
         .dropna(inplace=False)
     )
 
-    if date:
-        if date == "today":
-            date = time.strftime("%Y-%m-%d")
-
-        df = df[df.date == date]
+    # sort by timestamp
+    df.sort_values(by="timestamp", inplace=True)
 
     df.reset_index(inplace=True)
 
