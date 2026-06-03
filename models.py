@@ -15,7 +15,6 @@ class Distribution(BaseModel):
     distribution: list[float]
 
 class Headline(BaseModel):
-    status: Status
     id: int
     headline: str
     relevant: bool

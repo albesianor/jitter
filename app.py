@@ -51,7 +51,6 @@ async def distribution() -> Any:
 async def random() -> Any:
     headline = engine.random_headline()
     return {
-        "status": status,
         "id": headline.index.to_list()[0],
         "headline": headline.concat.to_list()[0],
         "relevant": bool(headline.relevant.to_list()[0]),
