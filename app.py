@@ -6,6 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import models
 from session import Session
+from settings import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,9 +26,8 @@ async def lifespan(app: FastAPI):
 
     # schedule fetch_and_process
     scheduler = AsyncIOScheduler()
-    frequency = int(os.getenv("REFRESH_FREQUENCY", 60))
-    print(f"Headlines updating every {frequency} minutes.")
-    scheduler.add_job(session.fetch_and_process, "interval", minutes=frequency)
+    print(f"Headlines refreshing every {settings.refresh_frequency} minutes.")
+    scheduler.add_job(session.fetch_and_process, "interval", minutes=settings.refresh_frequency)
     scheduler.start()
 
     yield
