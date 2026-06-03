@@ -2,8 +2,8 @@ from datetime import datetime
 from pydantic import BaseModel
 
 class Status(BaseModel):
-    last_trained: datetime
-    last_updated: datetime
+    last_trained: datetime | None
+    last_updated: datetime | None
 
 class Summary(BaseModel):
     status: Status
@@ -15,7 +15,6 @@ class Distribution(BaseModel):
     distribution: list[float]
 
 class Headline(BaseModel):
-    id: int
     headline: str
     relevant: bool
     jitter: float | None

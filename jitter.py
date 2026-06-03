@@ -35,9 +35,6 @@ class JitterEvaluator:
             optimizer="adam", loss="binary_crossentropy", metrics=["mae"]
         )
 
-        # data
-        self.clear()
-
     def train(self, df: pd.DataFrame):
         """
         Train the filter and scorer models.
@@ -62,81 +59,35 @@ class JitterEvaluator:
             X, y, batch_size=128, epochs=7, validation_split=0.2, verbose=0
         )
 
-    def process_headlines(self, headlines: pd.Series):
+    def embed(self, sequence: str | np.ndarray) -> np.ndarray:
         """
-        Process the headlines and store the result in the `JitterEvaluator` object.
+        Embed sequence(s).
 
         Args:
-            headlines (pd.Series): List of headlines as string.
-        """
-
-        # only process new headlines
-        headlines = headlines[~headlines.isin(self._current.concat)]
-
-        if len(headlines) == 0:
-            return
-
-        new_current = pd.DataFrame(
-            columns=["concat", "embedding", "relevant", "jitter"]
-        )
-        new_current["concat"] = headlines
-        new_current["embedding"] = self._embedder.encode(
-            new_current.concat.to_list()
-        ).tolist()
-
-        new_current["relevant"] = self._filter.predict(
-            pd.DataFrame(new_current.embedding.to_list())
-        )
-        new_current["jitter"] = new_current.apply(
-            lambda x: (
-                self._scorer.predict(np.array(x.embedding).reshape(1, -1), verbose=0)[
-                    0, 0
-                ]
-                if x.relevant == 1
-                else None
-            ),
-            axis=1,
-        )
-
-        # append to old current
-        self._current = pd.concat([self._current, new_current], ignore_index=True)
-
-        self._mean = self._current.jitter.mean()
-        self._std = self._current.jitter.std()
-
-    def clear(self):
-        """
-        Clear current headlines and predictions
-        """
-        self._current = pd.DataFrame(
-            columns=["concat", "embedding", "relevant", "jitter"]
-        )
-        self._mean = None
-        self._std = None
-
-    @property
-    def current_prediction(self) -> pd.DataFrame:
-        """
+            sequence(s) (str | np.ndarray): the sequence to embed
         Returns:
-            The complete current prediction dataset.
+            numpy.ndarray: the embedding as a list of floats
         """
-        return self._current
+        return self._embedder.encode(sequence)
 
-    @property
-    def mean(self) -> float:
-        return self._mean
-
-    @property
-    def std(self) -> float:
-        return self._std
-
-    @property
-    def distribution(self) -> pd.Series:
-        return self._current.jitter.dropna(inplace=False)
-
-    def random_headline(self) -> pd.DataFrame:
+    def filter(self, embedding: np.ndarray) -> np.ndarray:
         """
+        Filter embedded sequence(s) by relevance.
+
+        Args:
+            embedding (numpy.ndarray): the embedding(s) of the sequence(s)
         Returns:
-            A random headline.
+            numpy.ndarray: 0 if not relevant, 1 if relevant
         """
-        return self._current.sample()
+        return self._filter.predict(embedding)
+
+    def score(self, embedding: np.ndarray) -> np.ndarray:
+        """
+        Score embedded sequence(s) by jitteriness.
+
+        Args:
+            embedding (numpy.ndarray): the embedding(s) of the sequence(s)
+        Returns:
+            numpy.ndarray: the score(s) between 0 (min) and 1 (max)
+        """
+        return self._scorer.predict(embedding)
