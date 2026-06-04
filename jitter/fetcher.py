@@ -1,10 +1,19 @@
+"""Utilities to fetch remote resources"""
+
 import feedparser
 import time
 import ssl
 import pandas as pd
 
 
-async def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
+async def get_headlines(urls: list[str], trim: int) -> pd.Series:
+    """
+    Fetch headlines from url list.
+
+    Args:
+        urls (list[str]): a list of RSS feed urls
+        trim (int): the number of most recent headlines to keep
+    """
     if hasattr(ssl, "_create_unverified_context"):
         ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -20,7 +29,9 @@ async def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
             try:
                 parsed_entry = {
                     "concat": entry.title + " | " + entry.description,
-                    "date": time.strftime("%Y-%m-%d", entry.published_parsed),
+                    "timestamp": time.strftime(
+                        "%Y-%m-%d-%H-%M-%S", entry.published_parsed
+                    ),
                 }
                 parsed_feed.append(parsed_entry)
             except:
@@ -32,12 +43,14 @@ async def get_headlines(urls: list[str], date: str | None = None) -> pd.Series:
         .dropna(inplace=False)
     )
 
-    if date:
-        if date == "today":
-            date = time.strftime("%Y-%m-%d")
-
-        df = df[df.date == date]
-
+    # sort by timestamp
+    df.sort_values(by="timestamp", inplace=True)
     df.reset_index(inplace=True)
+
+    # only keep the "trim"-most-recent
+    to_remove = len(df) - trim
+    if to_remove > 0:
+        df = df.iloc[to_remove:]
+        df.reset_index(inplace=True)
 
     return df.concat

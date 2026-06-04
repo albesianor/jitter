@@ -1,24 +1,28 @@
+"""Session management"""
+
 import asyncio, ast
 from datetime import datetime
 import pandas as pd
 import numpy as np
 
-from models import Status
-from jitter import JitterEvaluator
-from routines import get_headlines
+from .models import Status
+from .engine import JitterEvaluator
+from .fetcher import get_headlines
 
 
 class Session:
     """The current predictions"""
 
-    def __init__(self, sources: str | None = None):
+    def __init__(self, sources: str, trim: int = 300):
         """
         Args:
             sources (str): filename of sources list
+            trim (int): max number of headlines to keep in the session object
         """
         self._engine = JitterEvaluator()
-        self._sources = pd.read_csv("sources.csv").url
+        self._sources = pd.read_csv(sources).url
         self._status = Status(last_trained=None, last_updated=None)
+        self._trim = trim
 
         self.clear()
 
@@ -45,7 +49,7 @@ class Session:
             training = pd.read_csv(filename)
         else:
             # placeholder for future implementation of training dataset fetcher
-            training = pd.read_csv("training.csv")
+            training = pd.read_csv("data/training.csv")
 
         training["embedding"] = await asyncio.to_thread(
             training.embedding.apply, ast.literal_eval
@@ -62,13 +66,13 @@ class Session:
         if self._status.last_trained is None:
             return
 
-        headlines = await get_headlines(self._sources, date="today")
+        headlines = await get_headlines(self._sources, self._trim)
 
         await asyncio.to_thread(self.process_headlines, headlines)
 
     def process_headlines(self, headlines: pd.Series) -> None:
         """
-        Process the headlines and store the result in the `JitterEvaluator` object.
+        Process the headlines and store the result.
 
         Args:
             headlines (pd.Series): List of headlines as string.
@@ -95,9 +99,7 @@ class Session:
         )
         new_current["jitter"] = new_current.apply(
             lambda x: (
-                self._engine.score(np.array(x.embedding).reshape(1, -1))[
-                    0, 0
-                ]
+                self._engine.score(np.array(x.embedding).reshape(1, -1))[0, 0]
                 if x.relevant == 1
                 else None
             ),
@@ -105,7 +107,14 @@ class Session:
         )
 
         # append to old current
+        # ignore_index=True resets the dataframe index
         self._current = pd.concat([self._current, new_current], ignore_index=True)
+
+        # trim self._current to self._trim items
+        to_remove = len(self._current) - self._trim
+        if to_remove > 0:
+            self._current = self._current.iloc[to_remove:]
+            self._current.reset_index(inplace=True)
 
         self._mean = self._current.jitter.mean()
         self._std = self._current.jitter.std()

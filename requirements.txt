@@ -6,3 +6,5 @@ sentence-transformers
 keras
 jax
 fastapi[standard]
+APScheduler
+pydantic_settings
