@@ -1,3 +1,5 @@
+"""Utilities to fetch remote resources"""
+
 import feedparser
 import time
 import ssl
@@ -5,6 +7,13 @@ import pandas as pd
 
 
 async def get_headlines(urls: list[str], trim: int) -> pd.Series:
+    """
+    Fetch headlines from url list.
+
+    Args:
+        urls (list[str]): a list of RSS feed urls
+        trim (int): the number of most recent headlines to keep
+    """
     if hasattr(ssl, "_create_unverified_context"):
         ssl._create_default_https_context = ssl._create_unverified_context
 

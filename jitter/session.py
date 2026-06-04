@@ -1,3 +1,5 @@
+"""Session management"""
+
 import asyncio, ast
 from datetime import datetime
 import pandas as pd
@@ -5,7 +7,7 @@ import numpy as np
 
 from .models import Status
 from .engine import JitterEvaluator
-from .routines import get_headlines
+from .fetcher import get_headlines
 
 
 class Session:

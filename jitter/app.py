@@ -1,3 +1,5 @@
+"""FastAPI application entrypoints and lifecycle management."""
+
 import os
 from fastapi import FastAPI
 from typing import Any
