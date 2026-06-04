@@ -20,7 +20,9 @@ async def get_headlines(urls: list[str], trim: int) -> pd.Series:
             try:
                 parsed_entry = {
                     "concat": entry.title + " | " + entry.description,
-                    "timestamp": time.strftime("%Y-%m-%d-%H-%M-%S", entry.published_parsed),
+                    "timestamp": time.strftime(
+                        "%Y-%m-%d-%H-%M-%S", entry.published_parsed
+                    ),
                 }
                 parsed_feed.append(parsed_entry)
             except:
@@ -39,7 +41,7 @@ async def get_headlines(urls: list[str], trim: int) -> pd.Series:
     # only keep the "trim"-most-recent
     to_remove = len(df) - trim
     if to_remove > 0:
-        df = df.iloc[to_remove :]
+        df = df.iloc[to_remove:]
         df.reset_index(inplace=True)
 
     return df.concat

@@ -4,9 +4,10 @@ from typing import Any
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-import models
-from session import Session
-from settings import settings
+from . import models
+from .session import Session
+from .settings import settings
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,10 +15,10 @@ async def lifespan(app: FastAPI):
 
     # load, train, and initialize predictions
     print("Loading model.")
-    session = Session()
+    session = Session("data/sources.csv")
 
     print("Training.")
-    await session.train()
+    await session.train("data/training.csv")
 
     print("Begin predictions.")
     await session.fetch_and_process()
@@ -27,7 +28,9 @@ async def lifespan(app: FastAPI):
     # schedule fetch_and_process
     scheduler = AsyncIOScheduler()
     print(f"Headlines refreshing every {settings.refresh_frequency} minutes.")
-    scheduler.add_job(session.fetch_and_process, "interval", minutes=settings.refresh_frequency)
+    scheduler.add_job(
+        session.fetch_and_process, "interval", minutes=settings.refresh_frequency
+    )
     scheduler.start()
 
     yield
