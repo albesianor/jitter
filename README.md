@@ -1,13 +1,3 @@
----
-title: Jitter
-emoji: 🫨
-colorFrom: purple
-colorTo: gray
-sdk: docker
-app_port: 7860
----
-
-
 # Jitter
 
 A natural language processing tool to measure instability from news headlines.
