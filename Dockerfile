@@ -11,7 +11,7 @@ COPY --chown=user ./requirements.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
 	&& pip install --no-cache-dir -r requirements.txt
 
-# COPY --chown=user ./data /app/data
+COPY --chown=user ./data /app/data
 COPY --chown=user ./jitter /app/jitter
 USER user
 
