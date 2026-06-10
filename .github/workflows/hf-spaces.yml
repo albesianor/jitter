@@ -1,0 +1,41 @@
+name: Sync GitHub to Hugging Face Hub
+on:
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Inject HF Metadata into README
+        run: |
+          # 1. Check if the metadata file exists
+          METADATA_FILE=".github/hf-metadata.yml"
+          if [ ! -f "$METADATA_FILE" ]; then
+            echo "Error: $METADATA_FILE not found!"
+            exit 1
+          fi
+
+          # 2. Check if README.md exists, if not create an empty one
+          if [ ! -f README.md ]; then
+            touch README.md
+          fi
+          
+          # 3. Construct the front-matter block and merge with the existing README
+          echo "---" > temp_readme.md
+          cat "$METADATA_FILE" >> temp_readme.md
+          echo "---" >> temp_readme.md
+          cat README.md >> temp_readme.md
+          
+          # 4. Overwrite the workspace README
+          mv temp_readme.md README.md
+
+      - uses: huggingface/hub-sync@v0.1.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: robertoalbesiano/jitter
+          hf_token: ${{ secrets.HF_TOKEN }}
