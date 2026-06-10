@@ -2,7 +2,7 @@
 
 import os
 
-os.environ["KERAS_BACKEND"] = "jax"
+os.environ["KERAS_BACKEND"] = "torch"
 
 import keras
 import pandas as pd
