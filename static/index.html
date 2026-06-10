@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jitter Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="orb orb-a" aria-hidden="true"></div>
+  <div class="orb orb-b" aria-hidden="true"></div>
+
+  <div class="page-shell">
+    <header class="status-panel" aria-label="Model status">
+      <div class="header-top">
+        <h1>Jitter</h1>
+        <a class="repo-link" href="https://github.com/albesianor/jitter" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+      <dl class="status-grid">
+        <div>
+          <dt>Last trained</dt>
+          <dd id="last-trained">—</dd>
+        </div>
+        <div>
+          <dt>Last updated</dt>
+          <dd id="last-updated">—</dd>
+        </div>
+      </dl>
+    </header>
+
+    <main>
+      <section class="score-panel" aria-label="Current jitter score">
+        <p class="score-label">Current jitter</p>
+        <p id="jitter-mean" class="score-value">—</p>
+        <p id="jitter-std" class="score-std">± —</p>
+      </section>
+
+      <section id="feedback" class="feedback-panel" aria-label="Headline feedback">
+        <div class="feedback-header">
+          <h2>Random headline</h2>
+          <button type="button" id="new-headline-btn">New headline</button>
+        </div>
+
+        <article id="headline-card">
+          <h3 id="headline-title">—</h3>
+          <p id="headline-description">—</p>
+
+          <dl class="headline-meta">
+            <div>
+              <dt>Relevant</dt>
+              <dd id="headline-relevant">—</dd>
+            </div>
+            <div>
+              <dt>Jitter score</dt>
+              <dd id="headline-jitter">—</dd>
+            </div>
+          </dl>
+        </article>
+      </section>
+
+      <aside class="sources-note" aria-label="Headline sources">
+        <h2>Sources</h2>
+        <p>Headlines are sourced from the following RSS feeds:</p>
+        <ul>
+          <li><strong>NYT:</strong> World, US, Business, Technology</li>
+          <li><strong>WSJ:</strong> World, Business, Markets, Technology, US, Politics, Economy, Personal Finance, Health</li>
+          <li><strong>Bloomberg:</strong> Markets, Politics, Technology, Personal Finance, Economy, Business</li>
+        </ul>
+      </aside>
+    </main>
+  </div>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

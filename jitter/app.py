@@ -2,6 +2,7 @@
 
 import os
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from typing import Any
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -62,3 +63,6 @@ async def random() -> Any:
         "relevant": bool(headline.relevant.to_list()[0]),
         "jitter": headline.jitter.to_list()[0],
     }
+
+
+app.mount("/", StaticFiles(directory="static", html=True))

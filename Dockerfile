@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY --chown=user ./data /app/data
 COPY --chown=user ./jitter /app/jitter
+COPY --chown=user ./static /app/static
+
 USER user
 
 CMD ["uvicorn", "jitter:app", "--host", "0.0.0.0", "--port", "7860"]
