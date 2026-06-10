@@ -1,10 +1,9 @@
 feedparser
 pandas
-numpy
 scikit-learn
 sentence-transformers
 keras
-jax
-fastapi[standard]
-APScheduler
-pydantic_settings
+fastapi
+uvicorn
+apscheduler
+pydantic-settings
