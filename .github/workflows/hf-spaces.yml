@@ -28,7 +28,9 @@ jobs:
           # 3. Construct the front-matter block and merge with the existing README
           echo "---" > temp_readme.md
           cat "$METADATA_FILE" >> temp_readme.md
+          echo "" >> temp_readme.md
           echo "---" >> temp_readme.md
+          echo "" >> temp_readme.md
           cat README.md >> temp_readme.md
           
           # 4. Overwrite the workspace README
